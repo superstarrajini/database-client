@@ -13,7 +13,7 @@ I've created this client so that it would be extremely easy to consume the Masha
 Initialize the client libary by specifying the Redis host and port:
 
 ```javascript
-var client = new Client("127.0.0.1", 6379);
+var client = new Client("127.0.0.1", 6379, true); // Debug is set to true
 ```
 
 ## Load entities

@@ -4,11 +4,12 @@ var unirest = require('unirest')
 var PRIMARY = "_primary";
 var RESERVED_FIELDS = [ "id", "status", "updateDate", "creationDate", "_links", PRIMARY];
 
-var Client = function(redisHost, redisPort) {
+var Client = function(redisHost, redisPort, debug) {
   //this.baseUrl = baseUrl;
   this.redisClient = redis.createClient(redisPort, redisHost);
+  this.debug = debug;
   this.redisClient.on("error", function (err) {
-    console.log("Error " + err);
+    console.error("Error " + err);
   });
 }
 
@@ -35,7 +36,7 @@ Client.prototype.get = function(url, callback) {
   this.redisClient.get(url, function(err, reply) {
     if (reply) {
       console.log("Getting from cache");
-      $this._printDuration(start);
+      $this._printDuration(start, url);
       callback($this._prepare(JSON.parse(reply)));
     } else {
       unirest.get(url).end(function (response) {
@@ -56,7 +57,7 @@ Client.prototype.get = function(url, callback) {
           $this._cache(url, entity);
           result = $this._prepare(entity);
         }
-        $this._printDuration(start);
+        $this._printDuration(start, url);
         callback(result);
       });
     }
@@ -149,8 +150,10 @@ Client.prototype._trim = function(val) {
   return val.replace(/^\s+|\s+$/g, '');
 };
 
-Client.prototype._printDuration = function(start) {
-  console.log("Took " + (new Date().getTime() - start) + "ms");
+Client.prototype._printDuration = function(start, url) {
+  if (this.debug) {
+    console.log("[" + url + "] " + (new Date().getTime() - start) + "ms");
+  }
 }
 
 module.exports = Client;
